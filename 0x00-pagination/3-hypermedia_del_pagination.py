@@ -45,17 +45,28 @@ class Server:
             return []
         return save[start:end]
 
-    def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict:
-        """that takes the same arguments (and defaults) as get_page
+    def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
+        """takes the same arguments (and defaults) as
+        get_page and returns a dictionary
         """
-        save = self.get_page(page, page_size)
-        start, end = index_range(page, page_size)
-        total_pages = math.ceil(len(self.__dataset) / page_size)
-        return {
-            'page_size': len(save),
-            'page': page,
-            'data': save,
-            'next_page': page + 1 if end < len(self.__dataset) else None,
-            'prev_page': page - 1 if start > 0 else None,
-            'total_pages': total_pages
+        save = self.indexed_dataset()
+        assert index is not None and index >= 0 and index <= max(save.keys())
+        page_save = []
+        next_index = None
+        count = 0
+        start = index if index else 0
+        for i, item in save.items():
+            if i >= start and count < page_size:
+                page_save.append(item)
+                count += 1
+                continue
+            if count == page_size:
+                next_index = i
+                break
+        parameter = {
+            'index': index,
+            'next_index': next_index,
+            'page_size': len(page_save),
+            'data': page_save,
         }
+        return parameter
