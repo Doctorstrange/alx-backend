@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''Task 1: FIFO caching
+'''that inherits from BaseCaching and is a caching system:
 '''
 
 
