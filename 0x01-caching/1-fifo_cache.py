@@ -9,14 +9,16 @@ from base_caching import BaseCaching
 
 
 class FIFOCache(BaseCaching):
-    """class that inherits from Basecache"""
+    """class that inherits from Basecaching"""
 
     def __init__(self):
         super().__init__()
         self.cache_data = OrderedDict()
 
     def put(self, key, item):
-        """assign value of key to the self.cache_data"""
+        """assign value of key to the self.cache_data
+            and the item value for the key
+        """
 
         if key is None or item is None:
             return
