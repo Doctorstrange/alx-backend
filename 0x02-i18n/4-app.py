@@ -22,7 +22,7 @@ babel = Babel(app)
 
 
 @babel.localeselector
-def get_locale()-> str:
+def get_locale():
     """ determine the best match with our supported languages.
     Returns: best match
     """
@@ -39,4 +39,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
