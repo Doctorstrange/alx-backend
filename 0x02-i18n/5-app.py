@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''basic Flask app
+'''Task 4: Force locale with URL parameter
 '''
 
 from typing import Dict, Union
@@ -10,6 +10,7 @@ from flask_babel import Babel
 class Config:
     '''Config class'''
 
+    DEBUG = True
     LANGUAGES = ["en", "fr"]
     BABEL_DEFAULT_LOCALE = "en"
     BABEL_DEFAULT_TIMEZONE = "UTC"
@@ -18,9 +19,7 @@ class Config:
 app = Flask(__name__)
 app.config.from_object(Config)
 app.url_map.strict_slashes = False
-
 babel = Babel(app)
-
 
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
@@ -31,7 +30,7 @@ users = {
 
 
 def get_user() -> Union[Dict, None]:
-    """get user with user id.
+    """Retrieves a user based on a user id.
     """
     login_id = request.args.get('login_as')
     if login_id:
@@ -41,28 +40,39 @@ def get_user() -> Union[Dict, None]:
 
 @app.before_request
 def before_request() -> None:
-    """before request
+    """Performs some routines before each request's resolution.
     """
 
     g.user = get_user()
 
 
 @babel.localeselector
-def get_locale():
-    """ determine the best match with our supported languages.
-    Returns: best match
+def get_locale() -> str:
+    """Retrieves the locale for a web page.
+
+    Returns:
+        str: best match
     """
-    locale_arg = request.args.get('locale')
-    if locale_arg in app.config['LANGUAGES']:
-        return locale_arg
+    locale = request.args.get('locale')
+    if locale in app.config['LANGUAGES']:
+        return locale
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
 @app.route('/')
-def index():
-    '''home page'''
-    return render_template("5-index.html",)
+def index() -> str:
+    '''default route
+
+    Returns:
+        html: homepage
+    '''
+    return render_template("5-index.html")
+
+# uncomment this line and comment the @babel.localeselector
+# you get this error:
+# AttributeError: 'Babel' object has no attribute 'localeselector'
+# babel.init_app(app, locale_selector=get_locale)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
