@@ -5,6 +5,7 @@
 from typing import Dict, Union
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
+import pytz
 
 
 class Config:
@@ -52,16 +53,40 @@ def get_locale():
     """ determine the best match with our supported languages.
     Returns: best match
     """
+    queries = request.query_string.decode('utf-8').split('&')
+    query_table = dict(map(
+        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
+        queries,
+    ))
     locale_arg = request.args.get('locale')
     if locale_arg in app.config['LANGUAGES']:
         return locale_arg
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+    if g.user and g.user['locale'] in app.config["LANGUAGES"]:
+        return g.user['locale']
+    head = request.headers.get('locale', '')
+    if head in app.config["LANGUAGES"]:
+        return head
+    return app.config['BABEL_DEFAULT_LOCALE']
+
+
+@babel.timezoneselector
+def get_timezone() -> str:
+    """Retrieves the timezone for a web page.
+    """
+    zone = request.args.get('timezone', '').strip()
+    if not zone and g.user:
+        zone = g.user['timezone']
+    try:
+        return pytz.timezone(zone).zone
+    except pytz.exceptions.UnknownTimeZoneError:
+        return app.config['BABEL_DEFAULT_TIMEZONE']
 
 
 @app.route('/')
 def index():
     '''home page'''
-    return render_template("5-index.html",)
+    g.time = format_datetime()
+    return render_template("7-index.html",)
 
 
 if __name__ == "__main__":
